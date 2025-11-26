@@ -21,7 +21,7 @@ def print_query(conn, q_number, query):
 
     # קו מפריד + כותרת השאלה
     print("=" * 45)
-    print(q_number)
+    print(f"Question: {q_number}")
     print("The query:\n")
     print(query)
     print()
@@ -31,7 +31,7 @@ def print_query(conn, q_number, query):
 
     # כמות שורות
     num_rows = len(df)
-    print(num_rows)
+    print(f"Num of rows: {num_rows}")
     # הדפסת תוצאה – או הכול (אם <= 10) או 5 ראשונות ו-5 אחרונות
     if num_rows <= 10:
         print(df.to_string())
