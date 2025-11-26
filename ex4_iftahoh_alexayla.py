@@ -88,27 +88,61 @@ queries = [
     ),
     (
         "3",
-        """SELECT 
+        """
+        SELECT 
         RANK() OVER (ORDER BY SurfaceArea DESC) AS Area_Rank,
         *
         FROM Country
-        ORDER BY Area_Rank"""
+        ORDER BY Area_Rank
+        """
     ),
-    ("4",
-     """SELECT 
+    (
+        "4",
+        """
+        SELECT 
             DENSE_RANK() OVER (ORDER BY IndepYear ASC) AS IndepYear_Rank,
             *
         FROM Country
-        ORDER BY IndepYear_Rank, Code"""),
-    ("5",
-     """
-     SELECT 
-        RANK() OVER (ORDER BY COUNT(City.ID) DESC) AS City_Rank,
-        Country.*
-    FROM Country
-    LEFT JOIN City ON Country.Code = City.CountryCode
-    GROUP BY Country.Code
-    ORDER BY City_Rank DESC""")
+        ORDER BY IndepYear_Rank, Code
+        """
+    ),
+    (
+        "5",
+        """
+        SELECT 
+            RANK() OVER (ORDER BY COUNT(City.ID) DESC) AS City_Rank,
+            Country.*
+        FROM Country
+        LEFT JOIN City ON Country.Code = City.CountryCode
+        GROUP BY Country.Code
+        ORDER BY City_Rank DESC
+        """
+    ),
+    (   "6",
+        """
+        SELECT 
+            Name,
+            Population,
+            SUM(Population) OVER (ORDER BY Population DESC) AS Rolling_Population,
+            (SUM(Population) OVER (ORDER BY Population DESC) * 100.0 / SUM(Population) OVER ()) AS Rolling_Percent
+        FROM Country
+        ORDER BY Population DESC
+        """
+    ),
+    (
+        "7",
+        """
+        WITH Population_Stats AS (
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY Population DESC) as Rn,
+            (SUM(Population) OVER (ORDER BY Population DESC) * 100.0 / SUM(Population) OVER ()) as Rolling_Percent
+        FROM Country
+        )
+        SELECT MIN(Rn) as Min_Count
+        FROM Population_Stats
+        WHERE Rolling_Percent >= 50
+        """
+    ),
 
 ]
 
