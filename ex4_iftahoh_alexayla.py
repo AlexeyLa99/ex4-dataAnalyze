@@ -45,7 +45,7 @@ def print_query(conn, q_number, query):
 
 #------------------------------------------------------------
 # התחברות למסד הנתונים
-DB_FILE = ".venv/Scripts/World.db3"
+DB_FILE = "World.db3"
 conn = sqlite3.connect(DB_FILE)
 cur = conn.cursor()
 
@@ -86,6 +86,29 @@ queries = [
             Population ASC
         """
     ),
+    (
+        "3",
+        """SELECT 
+        RANK() OVER (ORDER BY SurfaceArea DESC) AS Area_Rank,
+        *
+        FROM Country
+        ORDER BY Area_Rank"""
+    ),
+    ("4",
+     """SELECT 
+            DENSE_RANK() OVER (ORDER BY IndepYear ASC) AS IndepYear_Rank,
+            *
+        FROM Country
+        ORDER BY IndepYear_Rank, Code"""),
+    ("5",
+     """
+     SELECT 
+        RANK() OVER (ORDER BY COUNT(City.ID) DESC) AS City_Rank,
+        Country.*
+    FROM Country
+    LEFT JOIN City ON Country.Code = City.CountryCode
+    GROUP BY Country.Code
+    ORDER BY City_Rank DESC""")
 
 ]
 
