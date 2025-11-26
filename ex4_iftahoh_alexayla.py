@@ -55,9 +55,35 @@ queries = [
     (
         "1",
         """
-        SELECT *
+        SELECT
+            Name,
+            Continent,
+            SurfaceArea,
+            SUM(SurfaceArea) OVER (PARTITION BY Continent) AS ContinentTotal,
+            SurfaceArea * 1.0 /
+                SUM(SurfaceArea) OVER (PARTITION BY Continent) AS SurfacePercent
         FROM Country
-        LIMIT 5
+        ORDER BY
+            Continent ASC,
+            SurfacePercent DESC;
+        """
+    ),
+    (
+        "2",
+        """
+        SELECT
+            Name,
+            CountryCode,
+            Population,
+            CASE
+                WHEN Population > AVG(Population) OVER (PARTITION BY CountryCode)
+                    THEN 'Above average'
+                ELSE 'Not above average'
+            END AS IsAboveCountryAvg
+        FROM City
+        ORDER BY
+            CountryCode ASC,
+            Population ASC
         """
     ),
 
