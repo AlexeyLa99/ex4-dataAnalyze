@@ -143,6 +143,23 @@ queries = [
         WHERE Rolling_Percent >= 50
         """
     ),
+    ("8",
+     """
+     WITH Pop_Stats AS (
+     SELECT 
+        Name,
+        Population,
+        SUM(Population) OVER (ORDER BY Population DESC) * 100.0 / SUM(Population) OVER () AS Rolling_Percent,
+        SUM(Population) OVER () AS Total_Population
+    FROM Country
+    )
+    SELECT 
+        Name,
+        Population,
+        Rolling_Percent
+    FROM Pop_Stats
+    WHERE (Rolling_Percent - (Population * 100.0 / Total_Population)) < 50
+    ORDER BY Population DESC""")
 
 ]
 
