@@ -159,7 +159,80 @@ queries = [
         Rolling_Percent
     FROM Pop_Stats
     WHERE (Rolling_Percent - (Population * 100.0 / Total_Population)) < 50
-    ORDER BY Population DESC""")
+    ORDER BY Population DESC"""),
+    ("9",
+     """
+     WITH Language_Ranks AS (
+     SELECT 
+        CountryCode, 
+        Language, 
+        Percentage,
+        ROW_NUMBER() OVER (PARTITION BY CountryCode ORDER BY Percentage DESC) as Rank
+     FROM CountryLanguage
+     )
+     SELECT 
+        CountryCode, 
+        Language, 
+        Percentage
+     FROM Language_Ranks
+     WHERE Rank <= 2"""),
+    ("10",
+     """
+     SELECT 
+        *,
+        RANK() OVER (PARTITION BY CountryCode ORDER BY Population DESC) AS Rank_In_Country,
+        RANK() OVER (ORDER BY Population DESC) AS Rank_Global
+     FROM City
+     ORDER BY ID"""),
+    ("11",
+     """
+     WITH LifeExp_Diffs AS (
+     SELECT 
+        LifeExpectancy,
+        LifeExpectancy - LAG(LifeExpectancy) OVER (ORDER BY LifeExpectancy) AS Diff
+     FROM Country
+     WHERE LifeExpectancy IS NOT NULL
+        )
+     SELECT COUNT(*) AS Gaps_Count
+     FROM LifeExp_Diffs
+     WHERE Diff > 1"""),
+    ("12",
+     """
+     SELECT
+      *
+     FROM Country AS C1
+     WHERE C1.IndepYear - 1 IN (SELECT IndepYear FROM Country WHERE IndepYear IS NOT NULL)
+     AND C1.IndepYear - 2 IN (SELECT IndepYear FROM Country WHERE IndepYear IS NOT NULL)"""),
+    ("13",
+     """
+     WITH Ordered_Countries AS (
+     SELECT 
+        Code,
+        Name,
+        IndepYear,
+        LAG(IndepYear) OVER (ORDER BY IndepYear, Code) AS Prev_IndepYear
+     FROM Country
+     WHERE IndepYear > 1800
+        ),
+     Gap_Flags AS (
+     SELECT 
+         *,
+         CASE 
+            WHEN (IndepYear - Prev_IndepYear) > 5 THEN 1 
+            ELSE 0 
+         END AS Is_Large_Gap
+     FROM Ordered_Countries
+        ),
+     Gap_Counts AS (
+     SELECT 
+         *,
+         SUM(Is_Large_Gap) OVER (ORDER BY IndepYear, Code) AS Gap_Number
+     FROM Gap_Flags
+        )
+     SELECT
+      *
+     FROM Gap_Counts
+     WHERE Gap_Number >= 7""")
 
 ]
 
